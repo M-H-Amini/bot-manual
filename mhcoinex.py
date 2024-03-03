@@ -3,9 +3,7 @@ import requests
 import numpy as np 
 import hashlib
 import time 
-import schedule
 import datetime
-import temp as tp
 import telegram
 
 def isBuy(l):
@@ -27,7 +25,7 @@ class MHCoinex:
         result = json.loads(response.text)
         return result
 
-    def setOrder(self, amount=60, price=1.2, type_='buy', market="XRP", signals=None):
+    def setOrder(self, amount=60, price=1.2, type_='buy', market="XRP"):
         url = 'https://api.coinex.com/v1/order/limit'
         current_time = int(time.time()*1000)
         body = {"access_id":"060D4B77867B4DB8BC9EE978E18EA91E",
@@ -49,18 +47,8 @@ class MHCoinex:
             print(body)
         if code == 0:
             id_ = result['data']['id']
-            if signals:
-                signals[market]['history'][type_]['id'] = id_
-                signals[market]['history'][type_]['price'] = price
-                signals[market]['history'][type_]['done'] = False
-                signals[market]['history'][type_]['time'] = datetime.datetime.now()
-                signals[market]['pending'] = type_
-                signals[market]['trading'] = True
             return result, id_
         else:
-            if signals:
-                signals[market]['history'][type_]['id'] = None
-                signals[market]['history'][type_]['done'] = False
             return result, None
 
     def setStopOrder(self, amount=60, price=1.2, stop_price=1.3, type_='buy', market="XRP", signals=None):
@@ -88,8 +76,8 @@ class MHCoinex:
             print('stop_price done ok!')
         return result
 
-    def getLatestTransactions(self):
-        url = 'https://api.coinex.com/v1/market/deals?market=XRPUSDT'
+    def getLatestTransactions(self, market='xrp'):
+        url = f'https://api.coinex.com/v1/market/deals?market={market.capitalize()}USDT'
         response = requests.get(url)
         result = json.loads(response.text)
         if result['code'] == 0:
@@ -209,12 +197,14 @@ class MHCoinex:
 
 
 if __name__ == '__main__':
-    CNT = [0]
-    SIGNALS = {'ADA': {'enable': True, 'buy_amount': 10, 'sell_amount': 10, 'pending':'sell', 'trading': False, 'ma_loss_amount': 1.5, 'ma_gain_amount': 2, 'ma_gain_sell': None, 'ma_loss_sell': None, 'under_gain_amount': 0.02, 'above_gain_amount': 0.0075, 'under_loss_amount': 0.015, 'above_loss_amount': 0.01, 'last_buy':None, 'gain_amount': 0.01, 'loss_amount': 0.007, 'gain_percentage': 0.7, 'loss_percentage':0.35, 'gain_cnt':0, 'cci':list(), 'ma4':list(), 'ma20':list(), 'history':{'buy':{'done': True, 'id': None, 'price': 0, 'temp': False}, 'sell':{'done': True, 'id': None, 'price': 0}}}, 
-           'XRP': {'enable': False, 'buy_amount': 120, 'sell_amount': 120, 'pending':'buy', 'trading': False, 'ma_loss_amount': 1.5, 'ma_gain_amount': 2, 'ma_gain_sell': None, 'ma_loss_sell': None, 'last_buy':None, 'gain_amount': 0.01, 'loss_amount': 0.007, 'gain_percentage': 0.7, 'loss_percentage':0.35, 'gain_cnt':0, 'cci':list(), 'ma4':list(), 'ma20':list(), 'history':{'buy':{'done': True, 'id': None, 'price': 0, 'temp': False}, 'sell':{'done': True, 'id': None, 'price': 0}}}}
     mhc = MHCoinex()
+    res = mhc.getMarketStatistics('doge')
+    print(res)
+    res = mhc.getLatestTransactions('doge')
+    print(res)
     # mhc.setStopOrder(60, price=1, stop_price=1.2, signals=SIGNALS)
-    result = mhc.getUserDeals('ADA')
-    print(result)
-    tradesIchimoku(mhc, CNT, SIGNALS)
+
+    # result = mhc.getUserDeals('ADA')
+    # print(result)
+    
     
