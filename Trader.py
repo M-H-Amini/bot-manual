@@ -45,11 +45,29 @@ class Trader:
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
+    def process(self):
+        ##  To process both active and inactive long positions...
+        pass
+
+    def getActiveIDs(self):
+        ids = self.long_dict.keys()
+        return [id for id in ids if self.long_dict[id].started]
+    
+    def getInactiveIDs(self):
+        ids = self.long_dict.keys()
+        return [id for id in ids if not self.long_dict[id].started]
+
+
+
 if __name__ == "__main__":
     trader = Trader()
-    # trader.addLong('XRP', 0.09, 0.08, 0.12, 1, 1000)
-    trader.removeLong(10)
+    # trader.addLong('XRP', 0.09, 0.08, 0.12, 1, 1000, True)
+    # trader.removeLong(10)
     print('Long Dictionary:')
     print(trader.loadPickle('long.pkl'))
-    print('History Dictionary:')
-    print(trader.loadPickle('history.pkl'))
+    # print('History Dictionary:')
+    # print(trader.loadPickle('history.pkl'))
+    print('Active IDs:')
+    print(trader.getActiveIDs())
+    print('Inactive IDs:')
+    print(trader.getInactiveIDs())
