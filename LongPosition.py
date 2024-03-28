@@ -10,7 +10,7 @@
 
 
 class LongPosition:
-    def __init__(self, id, coin, entry, loss_price, profit_price, total_risk_percentage=1., total_budget=1000., started=False):
+    def __init__(self, id, coin, entry, loss_price, profit_price, total_risk_percentage=1., total_budget=1000., status='not_started', order_id=None):
         self.id = id
         self.coin = coin
         self.entry = entry
@@ -22,13 +22,20 @@ class LongPosition:
         self.profit_percentage = (self.profit_price - self.entry) / self.entry * 100
         self.risk_reward_ratio = self.profit_percentage / self.loss_percentage
         self.position_amount = self.total_budget * self.total_risk_percentage / self.loss_percentage  ##  In USD...
-        self.started = started
+        self.status = status
+        self.order_id = order_id
+
+    def update(self):
+        self.loss_percentage = (self.entry - self.loss_price) / self.entry * 100
+        self.profit_percentage = (self.profit_price - self.entry) / self.entry * 100
+        self.risk_reward_ratio = self.profit_percentage / self.loss_percentage
 
     def __repr__(self):
         msg = f"""
         {"-"*50}
             Long Position:
                 ID: {self.id},
+                Order ID: {self.order_id},
                 Coin: {self.coin},
                 Entry Price: {self.entry},
                 Loss Price: {self.loss_price} ({self.loss_percentage: .2f}%),
@@ -37,7 +44,8 @@ class LongPosition:
                 Total Risk Percentage: {self.total_risk_percentage}%,
                 Total Budget: {self.total_budget} USD,
                 Position Amount: {self.position_amount: .2f} USD
-                Started: {self.started}
+                Status: {self.status}
+
         {"-"*50}
         """
         return msg
